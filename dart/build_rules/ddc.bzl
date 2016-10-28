@@ -84,8 +84,8 @@ def ddc_action(ctx, dart_ctx, ddc_output, source_map_output):
   flags = ["@%s" % flags_file.path]
 
   ctx.action(
-      inputs=inputs,
-      executable=ctx.executable._dev_compiler,
+    inputs=inputs + [f for f in ctx.attr._dev_compiler.files],
+      executable=[f for f in ctx.attr._dev_compiler.files][0],
       arguments=flags,
       outputs=outputs,
       progress_message="Compiling %s with ddc" % ctx.label,

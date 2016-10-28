@@ -104,12 +104,12 @@ _dart_library_attrs = {
     "web_exclude_srcs": attr.label_list(allow_files = True),
     "_analyzer": attr.label(
         default = Label("//dart/build_rules/ext:dart_analyzer"),
-        executable = True,
+        #executable = True,
         cfg = "host",
     ),
     "_dev_compiler": attr.label(
         default = Label("//dart/build_rules/ext:dev_compiler"),
-        executable = True,
+        #executable = True,
         cfg = "host",
     ),
 }

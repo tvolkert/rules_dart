@@ -24,7 +24,7 @@ filegroup(
 
 filegroup(
   name = "analyzer",
-  srcs = ["dart-sdk/bin/dartanalyzer"],
+  srcs = ["dart-sdk/bin/dartanalyzer", "dart-sdk/bin/dart", "dart-sdk/bin/snapshots/dartanalyzer.dart.snapshot"],
 )
 
 filegroup(
@@ -43,7 +43,7 @@ filegroup(
 
 filegroup(
   name = "dev_compiler",
-  srcs = ["dart-sdk/bin/dartdevc"],
+  srcs = ["dart-sdk/bin/dartdevc", "dart-sdk/bin/dart", "dart-sdk/bin/snapshots/dartdevc.dart.snapshot"],
 )
 
 filegroup(

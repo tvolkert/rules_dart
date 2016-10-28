@@ -97,7 +97,7 @@ def analyze_action(ctx, dart_ctx, summary=None,
         executable=True,
     )
   else:
-    executable = ctx.executable._analyzer
+    executable = [f for f in ctx.attr._analyzer.files][0]
 
   # Find dependent contexts, filtering out those with no sources.
   dependent_ctxs = [
@@ -199,7 +199,7 @@ def analyze_action(ctx, dart_ctx, summary=None,
     mode = "spec"
 
   ctx.action(
-    inputs=inputs,
+    inputs=inputs + [f for f in ctx.attr._analyzer.files],
     outputs=outputs,
     executable=executable,
     arguments=analyzer_args,

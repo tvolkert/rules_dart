@@ -198,8 +198,11 @@ def analyze_action(ctx, dart_ctx, summary=None,
   else:
     mode = "spec"
 
+  print("**** YAY")
+  print([f for f in ctx.attr._analyzer.files])
+
   ctx.action(
-    inputs=inputs,
+    inputs=inputs, # + ctx.attr._analyzer.files_to_run,
     outputs=outputs,
     executable=executable,
     arguments=analyzer_args,

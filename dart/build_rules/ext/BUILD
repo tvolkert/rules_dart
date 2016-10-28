@@ -24,19 +24,19 @@ filegroup(
     }),
 )
 
-filegroup(
+alias(
     name = "dart_analyzer",
-    srcs = select({
-        "//dart:darwin": ["@dart_darwin_x86_64//:analyzer"],
-        "//dart:k8": ["@dart_linux_x86_64//:analyzer"],
+    actual = select({
+        "//dart:darwin": "@dart_darwin_x86_64//:analyzer",
+        "//dart:k8": "@dart_linux_x86_64//:analyzer",
     }),
 )
 
-filegroup(
+alias(
     name = "dev_compiler",
-    srcs = select({
-        "//dart:darwin": ["@dart_darwin_x86_64//:dev_compiler"],
-        "//dart:k8": ["@dart_linux_x86_64//:dev_compiler"],
+    actual = select({
+        "//dart:darwin": "@dart_darwin_x86_64//:dev_compiler",
+        "//dart:k8": "@dart_linux_x86_64//:dev_compiler",
     }),
 )
 

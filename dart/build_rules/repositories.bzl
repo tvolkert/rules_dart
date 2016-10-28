@@ -22,9 +22,10 @@ filegroup(
   srcs = ["dart-sdk/bin/dart"],
 )
 
-filegroup(
+sh_binary(
   name = "analyzer",
   srcs = ["dart-sdk/bin/dartanalyzer"],
+  data = ["dart-sdk/bin/dart", "dart-sdk/bin/snapshots/dartanalyzer.dart.snapshot"],
 )
 
 filegroup(
@@ -41,9 +42,10 @@ filegroup(
   ]),
 )
 
-filegroup(
+sh_binary(
   name = "dev_compiler",
   srcs = ["dart-sdk/bin/dartdevc"],
+  data = ["dart-sdk/bin/dart", "dart-sdk/bin/snapshots/dartdevc.dart.snapshot"],
 )
 
 filegroup(

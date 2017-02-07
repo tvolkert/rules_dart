@@ -1,6 +1,5 @@
 load(
     ":common.bzl",
-    "layout_action",
     "make_dart_context",
     "package_spec_action"
 )
@@ -24,14 +23,7 @@ def dart_vm_snapshot_action(ctx, dart_ctx, output, vm_flags, script_file, script
       dart_ctx=dart_ctx,
   )
 
-  # Build a flattened directory of dart2js inputs, including inputs from the
-  # src tree, genfiles, and bin.
-  build_dir_files = layout_action(
-      ctx=ctx,
-      srcs=dart_ctx.transitive_srcs,
-      output_dir=build_dir,
-  )
-  out_script = build_dir_files[script_file.short_path]
+  dart_srcs = [src for src in dart_ctx.transitive_srcs]
 
   # TODO(cbracken) assert --snapshot not in flags
   # TODO(cbracken) assert --packages not in flags
@@ -40,10 +32,10 @@ def dart_vm_snapshot_action(ctx, dart_ctx, output, vm_flags, script_file, script
       "--snapshot=%s" % output.path,
   ]
   arguments += vm_flags
-  arguments += [out_script.path]
+  arguments += [script_file.path]
   arguments += script_args
   ctx.action(
-      inputs=build_dir_files.values() + [package_spec],
+      inputs=dart_srcs + [package_spec, script_file],
       outputs=[output],
       executable=ctx.executable._dart_vm,
       arguments=arguments,

@@ -94,15 +94,9 @@ def make_dart_context(
       package = pub_pkg_name
 
   if not lib_root:
-    lib_root = ""
-    if label.workspace_root.startswith("external/"):
-      lib_root += label.workspace_root[len("external/"):] + "/"
-
-    if label.package.startswith("vendor/"):
-      lib_root += label.package[len("vendor/"):] + "/"
-    elif label.package:
-      lib_root += label.package + "/"
-
+    lib_root = label.workspace_root + "/" + label.package
+    if not lib_root.endswith("/"):
+      lib_root += "/"
     lib_root += "lib/"
 
   srcs = set(srcs or [])
@@ -207,10 +201,7 @@ def package_spec_action(ctx, dart_ctx, output):
   for dc in dart_ctxs:
     if not dc.package:
       continue
-    lib_root = dc.lib_root
-    if dc.label.workspace_root != ctx.label.workspace_root:
-      lib_root = "external/%s" % lib_root
-      lib_root = relative_path(output.dirname, lib_root)
+    lib_root = relative_path(output.dirname, dc.lib_root)
     content += "%s:%s\n" % (dc.package, lib_root)
 
   # Emit the package spec.

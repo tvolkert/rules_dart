@@ -94,9 +94,13 @@ def make_dart_context(
       package = pub_pkg_name
 
   if not lib_root:
-    lib_root = label.workspace_root + "/" + label.package
-    if not lib_root.endswith("/"):
-      lib_root += "/"
+    lib_root = ""
+    if label.workspace_root:
+      lib_root += label.workspace_root + "/"
+    if label.package:
+      lib_root += label.package
+      if not label.package.endswith("/"):
+        lib_root += "/"
     lib_root += "lib/"
 
   srcs = set(srcs or [])

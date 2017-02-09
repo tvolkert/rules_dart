@@ -79,14 +79,14 @@ def _new_dart_context(label,
 
 merged_lib_name = "_merged_lib/"
 
-def find_lib_root(label):
-  """Returns the path for a label's sources."""
+def _path_under_label(label, path):
+  """Returns the path to a file or directory under a package label."""
   lib_root = ""
   if label.workspace_root:
     lib_root += label.workspace_root + "/"
   if label.package:
     lib_root += label.package + "/"
-  lib_root += merged_lib_name
+  lib_root += path
   return lib_root
 
 def make_dart_context(
@@ -106,7 +106,7 @@ def make_dart_context(
       package = pub_pkg_name
 
   if not lib_root:
-    lib_root = find_lib_root(label)
+    lib_root = _path_under_label(label, merged_lib_name)
 
   srcs = set(srcs or [])
   dart_srcs = filter_files(dart_filetypes, srcs)
@@ -211,13 +211,8 @@ def package_spec_action(ctx, dart_ctx, output_path):
   for dc in dart_ctxs:
     if not dc.package:
       continue
-    package_spec_location = ""
-    if ctx.label.workspace_root:
-      package_spec_location += ctx.label.workspace_root + "/"
-    if ctx.label.package:
-      package_spec_location += ctx.label.package + "/"
-    package_spec_location += output_path
-    package_spec_dir = package_spec_location[:package_spec_location.rfind("/")]
+    package_spec_path = _path_under_label(ctx.label, output_path)
+    package_spec_dir = package_spec_path[:package_spec_path.rfind("/")]
     lib_root = relative_path(package_spec_dir, dc.lib_root)
     content += "%s:%s\n" % (dc.package, lib_root)
 

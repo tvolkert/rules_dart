@@ -8,16 +8,12 @@ def dart_vm_snapshot_action(ctx, dart_ctx, output, vm_flags, script_file, script
   """Emits a Dart VM snapshot."""
   build_dir = ctx.label.name + ".build/"
 
-  # Emit package spec.
-  package_spec_path = ""
-  if ctx.label.package:
-    package_spec_path += ctx.label.package + "/"
-  package_spec_path += ctx.label.name + ".packages"
+  package_spec_path = ctx.label.name + ".packages"
 
   package_spec = package_spec_action(
       ctx=ctx,
       dart_ctx=dart_ctx,
-      output_path=build_dir + package_spec_path,
+      output_path=build_dir + ctx.label.name + ".packages",
   )
 
   dart_srcs = [src for src in dart_ctx.transitive_srcs]

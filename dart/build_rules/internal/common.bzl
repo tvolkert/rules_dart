@@ -303,7 +303,11 @@ def compute_layout(srcs):
 
 def relative_path(from_dir, to_path):
   """Returns the relative path from a directory to a path via the repo root."""
-  return "../" * (from_dir.count("/") + 1) + to_path
+  if to_path.startswith("/") or from_dir.startswith("/"):
+    fail("Absolute paths are not supported.")
+  if not from_dir:
+    return to_path
+  return "../" * len(from_dir.split("/")) + to_path
 
 def strip_extension(path):
   index = path.rfind(".")

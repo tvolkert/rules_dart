@@ -11,11 +11,10 @@ def dart_vm_test_impl(ctx):
   )
 
   # Emit package spec.
-  package_spec = ctx.new_file(ctx.label.name + ".packages")
-  package_spec_action(
+  package_spec = package_spec_action(
       ctx=ctx,
       dart_ctx=dart_ctx,
-      output=package_spec,
+      output_path = ctx.label.name + ".packages",
   )
 
   # Emit entrypoint script.

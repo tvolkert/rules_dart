@@ -77,8 +77,7 @@ def analyze_action(ctx, dart_ctx, summary=None,
   # Build a package spec if needed.
   if not use_build_mode:
     package_spec_path = ctx.label.package + "/" + ctx.label.name + ".packages"
-    package_spec = ctx.new_file(analyze_dir + package_spec_path)
-    package_spec_action(ctx, dart_ctx, package_spec)
+    package_spec = package_spec_action(ctx, dart_ctx, analyze_dir + package_spec_path)
 
   # Emit the script to run analyzer, if necessary.
   if script_needed:

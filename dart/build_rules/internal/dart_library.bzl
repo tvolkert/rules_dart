@@ -1,13 +1,33 @@
 load(
     ":common.bzl",
+    "api_summary_extension",
+    "merged_lib_name",
     "has_dart_sources",
     "make_dart_context",
-    "api_summary_extension",
+    "relative_path",
 )
 # TODO: Migrate both of these to an aspect? This would eliminate the
 # ddc/analyzer dependency for targets which don't actually need them.
 load(":analyze.bzl", "summary_action")
 load(":ddc.bzl", "ddc_action")
+
+def _path_under_package(label, src_file):
+  """Finds the path beneath a Dart package to a File.
+
+  For example for the target //path/to/package:library and the file
+  path/to/package/lib/file.dart returns `lib/file.dart`.
+  """
+  path = src_file.short_path
+  # Files in external repositories have paths like `../repository_name/lib/file`
+  if path.startswith("../"):
+    # Normalize the ../directory/
+    second_slash = path.find("/", 4)
+    path = path[second_slash + 1:]
+  # Packages that aren't at the root level have paths like
+  # `path/to/package/lib/file`
+  if label.package:
+    path = path[len(label.package) + 1:]
+  return path
 
 def dart_library_impl(ctx):
   """Implements the dart_library() rule."""
@@ -17,9 +37,33 @@ def dart_library_impl(ctx):
   strong_summary = ctx.outputs.strong_summary
   _has_dart_sources = has_dart_sources(ctx.files.srcs)
 
+  link_command = []
+  final_srcs = []
+  linked_srcs = []
+  for src in ctx.files.srcs:
+    path = _path_under_package(ctx.label, src)
+    # Since we might merge with a target that has generated source, link files
+    # that might be imported to a new directory which is always under bazel-bin
+    if path.startswith("lib/"):
+      path = path.replace("lib/", merged_lib_name, 1)
+      linked_file = ctx.new_file(path)
+      final_srcs.append(linked_file)
+      linked_srcs.append(linked_file)
+      link_target = relative_path(linked_file.dirname, src.path)
+      link_command.append("ln -s %s %s" % (link_target, linked_file.path))
+    else:
+      final_srcs.append(src)
+
+  if len(link_command) > 0:
+    ctx.action(
+        command = "\n".join(link_command),
+        inputs = ctx.files.srcs,
+        outputs = linked_srcs,
+    )
+
   dart_ctx = make_dart_context(
       ctx,
-      srcs = ctx.files.srcs,
+      srcs = final_srcs,
       data = ctx.files.data,
       deps = ctx.attr.deps,
       pub_pkg_name = ctx.attr.pub_pkg_name,

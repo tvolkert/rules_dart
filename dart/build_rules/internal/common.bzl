@@ -77,6 +77,18 @@ def _new_dart_context(label,
       transitive_deps=dict(transitive_deps or {}),
   )
 
+merged_lib_name = "_merged_lib/"
+
+def find_lib_root(label):
+  """Returns the path for a label's sources."""
+  lib_root = ""
+  if label.workspace_root:
+    lib_root += label.workspace_root + "/"
+  if label.package:
+    lib_root += label.package + "/"
+  lib_root += merged_lib_name
+  return lib_root
+
 def make_dart_context(
     ctx,
     package = None,
@@ -94,14 +106,7 @@ def make_dart_context(
       package = pub_pkg_name
 
   if not lib_root:
-    lib_root = ""
-    if label.workspace_root:
-      lib_root += label.workspace_root + "/"
-    if label.package:
-      lib_root += label.package
-      if not label.package.endswith("/"):
-        lib_root += "/"
-    lib_root += "lib/"
+    lib_root = find_lib_root(label)
 
   srcs = set(srcs or [])
   dart_srcs = filter_files(dart_filetypes, srcs)
@@ -187,7 +192,7 @@ def collect_dart_context(dart_ctx, transitive=True, include_self=True):
     ctx_map[dc.package] = dc
   return ctx_map
 
-def package_spec_action(ctx, dart_ctx, output):
+def package_spec_action(ctx, dart_ctx, output_path):
   """Creates an action that generates a Dart package spec.
 
   Arguments:
@@ -195,6 +200,7 @@ def package_spec_action(ctx, dart_ctx, output):
     dart_ctx: The Dart context.
     output: The output package_spec file.
   """
+  output = ctx.new_file(output_path)
   # There's a 1-to-many relationship between packages and targets, but
   # collect_transitive_packages() asserts that their lib_roots are the same.
   dart_ctxs = collect_dart_context(
@@ -205,7 +211,14 @@ def package_spec_action(ctx, dart_ctx, output):
   for dc in dart_ctxs:
     if not dc.package:
       continue
-    lib_root = relative_path(output.dirname, dc.lib_root)
+    package_spec_location = ""
+    if ctx.label.workspace_root:
+      package_spec_location += ctx.label.workspace_root + "/"
+    if ctx.label.package:
+      package_spec_location += ctx.label.package + "/"
+    package_spec_location += output_path
+    package_spec_dir = package_spec_location[:package_spec_location.rfind("/")]
+    lib_root = relative_path(package_spec_dir, dc.lib_root)
     content += "%s:%s\n" % (dc.package, lib_root)
 
   # Emit the package spec.
@@ -213,6 +226,7 @@ def package_spec_action(ctx, dart_ctx, output):
       output=output,
       content=content,
   )
+  return output
 
 def layout_action(ctx, srcs, output_dir):
   """Generates a flattened directory of sources.

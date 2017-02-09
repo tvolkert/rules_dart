@@ -192,13 +192,13 @@ def collect_dart_context(dart_ctx, transitive=True, include_self=True):
     ctx_map[dc.package] = dc
   return ctx_map
 
-def package_spec_action(ctx, dart_ctx, output_path):
+def package_spec_action(ctx, dart_ctx, output_path, using_runfiles = False):
   """Creates an action that generates a Dart package spec.
 
   Arguments:
     ctx: The rule context.
     dart_ctx: The Dart context.
-    output: The output package_spec file.
+    output_paty: The path to the created package spec file.
   """
   output = ctx.new_file(output_path)
   # There's a 1-to-many relationship between packages and targets, but
@@ -213,7 +213,13 @@ def package_spec_action(ctx, dart_ctx, output_path):
       continue
     package_spec_path = _path_under_label(ctx.label, output_path)
     package_spec_dir = package_spec_path[:package_spec_path.rfind("/")]
-    lib_root = relative_path(package_spec_dir, dc.lib_root)
+    lib_root = dc.lib_root
+    if using_runfiles:
+      if lib_root.startswith("external/"):
+        lib_root = lib_root[len("external/"):]
+      elif not ctx.label.package:
+        lib_root = ctx.workspace_name + "/" + lib_root
+    lib_root = relative_path(package_spec_dir, lib_root)
     content += "%s:%s\n" % (dc.package, lib_root)
 
   # Emit the package spec.

@@ -15,6 +15,7 @@ def dart_vm_test_impl(ctx):
       ctx=ctx,
       dart_ctx=dart_ctx,
       output_path = ctx.label.name + ".packages",
+      using_runfiles = True,
   )
 
   # Emit entrypoint script.
